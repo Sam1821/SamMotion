@@ -4,7 +4,7 @@
 // Pattern: https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/<slug>/0.jpg
 // (slugs are the canonical names from that repo; we hand-mapped a curated 100+ subset.)
 
-import type { EquipmentDef, ExerciseDict, MuscleGroup, MuscleId, Routine } from "./types"
+import type { EquipmentDef, ExerciseDict, HistoryEntry, MuscleGroup, MuscleId, PR, Routine } from "./types"
 
 const FE_BASE = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises"
 
@@ -264,13 +264,13 @@ export const ROUTINE_PRIORITY: Record<string, string[]> = {
 }
 
 // Default sample data shown for first-time users (cleared on first real workout).
-export const SAMPLE_HISTORY = [
+export const SAMPLE_HISTORY: HistoryEntry[] = [
   { id: "sample1", routine: "Chest + Tricep", routineId: "ct", date: new Date(Date.now() - 2*86400000).toISOString(), dur: 3600, vol: 4200, prsCount: 1, exs: ["Bench Press","Incline DB Press","Cable Fly"], sample: true },
   { id: "sample2", routine: "Back + Bicep",   routineId: "bb", date: new Date(Date.now() - 4*86400000).toISOString(), dur: 3300, vol: 3900, prsCount: 0, exs: ["Pull-Up","Bent-Over Row","DB Curl"], sample: true },
   { id: "sample3", routine: "Shoulder + Leg", routineId: "sl", date: new Date(Date.now() - 6*86400000).toISOString(), dur: 3900, vol: 5100, prsCount: 1, exs: ["Squat","OHP","Leg Press"], sample: true },
 ]
-export const SAMPLE_PRS: Record<string, { n: string; w: number; r: number; date: string; e1rm: number; sample?: boolean }> = {
-  bench:  { n:"Barbell Bench Press", w:80,  r:5, date:"Apr 18", e1rm:93,  sample:true },
-  squat:  { n:"Barbell Back Squat",  w:100, r:5, date:"Apr 16", e1rm:117, sample:true },
-  deadlift:{ n:"Barbell Deadlift",   w:120, r:5, date:"Apr 14", e1rm:140, sample:true },
+export const SAMPLE_PRS: Record<string, PR> = {
+  bench:    { n:"Barbell Bench Press", w:80,  r:5, date:"Apr 18", e1rm:93,  sample:true },
+  squat:    { n:"Barbell Back Squat",  w:100, r:5, date:"Apr 16", e1rm:117, sample:true },
+  deadlift: { n:"Barbell Deadlift",    w:120, r:5, date:"Apr 14", e1rm:140, sample:true },
 }

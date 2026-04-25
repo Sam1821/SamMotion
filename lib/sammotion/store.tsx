@@ -210,8 +210,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         isFirstTime,
       }))
       setLoading(false)
-    })().catch((e) => {
-      if (alive) { setError(e?.message || String(e)); setLoading(false) }
+    })().catch((e: unknown) => {
+      if (alive) {
+        const msg = e instanceof Error ? e.message : String(e)
+        setError(msg)
+        setLoading(false)
+      }
     })
     return () => { alive = false }
   }, [supabase])
@@ -313,7 +317,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const entry: HistoryEntry = {
         id: "h_" + Date.now(),
         date: new Date().toISOString(),
-        routine: s.gyms.find(() => true) ? undefined : undefined,  // routine name resolved below
         routineId: s.current.routineId,
         gymId: s.current.gymId,
         dur: summary.dur,
