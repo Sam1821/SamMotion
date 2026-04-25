@@ -7,7 +7,7 @@ export default function AuthErrorPage() {
       <div className="sm-auth-card">
         <div className="sm-auth-brand">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/icon-192.png" alt="SamMotion" />
+          <img src="/icon-192.png?v=2" alt="SamMotion" />
           <h1>SAMMOTION</h1>
         </div>
 
