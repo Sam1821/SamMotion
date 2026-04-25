@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Black rounded square background -->
+  <rect width="512" height="512" rx="112" ry="112" fill="#0A0A0A"/>
+  <!-- Subtle orange glow under the S -->
+  <defs>
+    <filter id="g" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+  </defs>
+  <path d="M 356 168 Q 356 108 288 108 L 220 108 Q 152 108 152 180 Q 152 252 220 252 L 292 252 Q 360 252 360 324 Q 360 404 288 404 L 220 404 Q 152 404 152 344"
+        stroke="#FF6B2B" stroke-width="58" fill="none"
+        stroke-linecap="round" stroke-linejoin="round"
+        opacity="0.35" filter="url(#g)"/>
+  <!-- Main S stroke -->
+  <path d="M 356 168 Q 356 108 288 108 L 220 108 Q 152 108 152 180 Q 152 252 220 252 L 292 252 Q 360 252 360 324 Q 360 404 288 404 L 220 404 Q 152 404 152 344"
+        stroke="#FF6B2B" stroke-width="56" fill="none"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

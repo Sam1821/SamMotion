@@ -1,0 +1,923 @@
+/* SamMotion — premium dark fitness UI.
+   Scoped via a root wrapper so it doesn't leak into shadcn. */
+
+.sm-root {
+  --bg: #070707;
+  --surface: #0e0e0e;
+  --card: #131313;
+  --card2: #1a1a1a;
+  --border: #202020;
+  --border2: #2c2c2c;
+  --orange: #ff6b2b;
+  --olo: rgba(255, 107, 43, 0.12);
+  --omd: rgba(255, 107, 43, 0.25);
+  --green: #39ff14;
+  --glo: rgba(57, 255, 20, 0.1);
+  --gmd: rgba(57, 255, 20, 0.22);
+  --t1: #f0f0f0;
+  --t2: #888;
+  --t3: #3a3a3a;
+  --rXL: 22px;
+  --rL: 16px;
+  --rM: 12px;
+  --rS: 8px;
+  --tabH: 72px;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+.sm-root *,
+.sm-root *::before,
+.sm-root *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.sm-stage {
+  min-height: 100dvh;
+  background: var(--bg);
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Mobile-first: app fills the entire viewport, no fake device frame. */
+.sm-app {
+  width: 100%;
+  min-height: 100dvh;
+  height: 100dvh;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  color: var(--t1);
+}
+
+/* On large viewports (tablet/desktop preview) show a subtle device-like frame. */
+@media (min-width: 768px) {
+  .sm-stage {
+    background: #000;
+    align-items: center;
+    padding: 24px;
+  }
+  .sm-app {
+    width: 420px;
+    height: min(900px, calc(100dvh - 48px));
+    min-height: 0;
+    border-radius: 40px;
+    box-shadow: 0 0 0 1px #1c1c1c, 0 40px 100px rgba(0, 0, 0, 0.9);
+  }
+}
+
+/* ── SCREENS ── */
+.sm-scr {
+  position: absolute;
+  inset: 0;
+  bottom: calc(var(--tabH) + env(safe-area-inset-bottom));
+  padding-top: env(safe-area-inset-top);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+}
+.sm-scr.on {
+  opacity: 1;
+  transform: none;
+  pointer-events: all;
+}
+.sm-scr::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── 5-TAB BAR ── */
+.tabs {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--tabH) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: rgba(7, 7, 7, 0.97);
+  backdrop-filter: blur(24px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  padding-top: 10px;
+  z-index: 50;
+}
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 2px 0;
+  user-select: none;
+  background: transparent;
+  border: none;
+}
+.tab svg path,
+.tab svg rect,
+.tab svg polyline,
+.tab svg circle,
+.tab svg line {
+  transition: stroke 0.2s;
+}
+.tlbl {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--t3);
+  letter-spacing: 0.3px;
+  transition: color 0.2s;
+  text-transform: uppercase;
+}
+.tab.on .tlbl {
+  color: var(--orange);
+}
+
+/* ── TYPE ── */
+.t10 { font-size: 10px; }
+.t11 { font-size: 11px; }
+.t13 { font-size: 13px; }
+.t15 { font-size: 15px; }
+.t17 { font-size: 17px; }
+.t20 { font-size: 20px; }
+.t26 { font-size: 26px; }
+.t32 { font-size: 32px; }
+.w5 { font-weight: 500; }
+.w6 { font-weight: 600; }
+.w7 { font-weight: 700; }
+.w8 { font-weight: 800; }
+.w9 { font-weight: 900; }
+.c1 { color: var(--t1); }
+.c2 { color: var(--t2); }
+.c3 { color: var(--t3); }
+.co { color: var(--orange); }
+.cg { color: var(--green); }
+.upper { text-transform: uppercase; letter-spacing: 0.8px; }
+.mono { font-variant-numeric: tabular-nums; }
+
+/* ── LAYOUT ── */
+.row { display: flex; align-items: center; }
+.col { display: flex; flex-direction: column; }
+.jb { justify-content: space-between; }
+.jc { justify-content: center; }
+.f1 { flex: 1; }
+.g4 { gap: 4px; } .g6 { gap: 6px; } .g8 { gap: 8px; } .g10 { gap: 10px; } .g12 { gap: 12px; } .g16 { gap: 16px; }
+.mx { margin: 0 16px; }
+.mt4 { margin-top: 4px; } .mt6 { margin-top: 6px; } .mt8 { margin-top: 8px; }
+.mt10 { margin-top: 10px; } .mt12 { margin-top: 12px; } .mt16 { margin-top: 16px; }
+.mb6 { margin-bottom: 6px; } .mb8 { margin-bottom: 8px; }
+.mb10 { margin-bottom: 10px; } .mb12 { margin-bottom: 12px; } .mb16 { margin-bottom: 16px; }
+.p16 { padding: 16px; }
+.px16 { padding: 0 16px; }
+
+/* ── CARDS ── */
+.sm-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--rL); padding: 18px; }
+.cardsm { background: var(--card); border: 1px solid var(--border); border-radius: var(--rM); padding: 14px 16px; }
+
+/* ── BUTTONS ── */
+.btnP {
+  width: 100%;
+  background: var(--orange);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 15px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 28px rgba(255, 107, 43, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+}
+.btnP:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 12px rgba(255, 107, 43, 0.2);
+}
+.btnG {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--t1);
+  cursor: pointer;
+  font-family: inherit;
+}
+.btnSm {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: var(--rM);
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--t1);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.btnSm:active { background: var(--border); }
+
+/* ── BADGES ── */
+.bdg {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.bdo { background: var(--olo); color: var(--orange); border: 1px solid var(--omd); }
+.bdg2 { background: var(--glo); color: var(--green); border: 1px solid var(--gmd); }
+
+/* ── SECTION HEADER ── */
+.shdr { display: flex; justify-content: space-between; align-items: center; padding: 4px 16px 10px; }
+.stitle { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+.slink { font-size: 12px; font-weight: 600; color: var(--orange); cursor: pointer; background: none; border: none; padding: 0; font-family: inherit; }
+
+/* ── STATUS BAR ── */
+.sm-brand-bar {
+  padding: 14px 22px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.sm-brand-mark {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: var(--t2);
+  text-transform: uppercase;
+}
+
+/* ── DIVIDER ── */
+.sm-div { height: 1px; background: var(--border); margin: 0 16px; }
+
+/* ── CHIPS ── */
+.chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.chip {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 3px 9px;
+  font-size: 10px;
+  color: var(--t2);
+  font-weight: 500;
+}
+
+/* ─────────────── HOME ─────────────── */
+.gymPill {
+  margin: 10px 16px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 7px 14px 7px 7px;
+  cursor: pointer;
+}
+.gymDot {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--olo);
+  border: 1px solid var(--omd);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nextCard {
+  margin: 0 16px 16px;
+  background: linear-gradient(135deg, #150b06 0%, #110c09 60%, #0f0f0f 100%);
+  border: 1px solid rgba(255, 107, 43, 0.2);
+  border-radius: var(--rXL);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.nextCard::after {
+  content: "";
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(255, 107, 43, 0.1) 0%, transparent 65%);
+  pointer-events: none;
+}
+.histItem {
+  margin: 0 16px 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--rL);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.histItem:active {
+  background: var(--card2);
+  transform: scale(0.99);
+}
+.sampleBanner {
+  margin: 0 16px 12px;
+  background: rgba(255, 107, 43, 0.06);
+  border: 1px solid rgba(255, 107, 43, 0.15);
+  border-radius: var(--rM);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ─────────────── WORKOUT ─────────────── */
+.woHdr {
+  padding: 20px 16px 14px;
+  background: linear-gradient(180deg, var(--surface) 0%, transparent 100%);
+}
+.pbarTrack {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+.pbarFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--orange), #ffaa7a);
+  border-radius: 2px;
+  transition: width 0.5s;
+}
+.tipBar {
+  margin: 0 16px 10px;
+  background: var(--glo);
+  border: 1px solid rgba(57, 255, 20, 0.15);
+  border-radius: var(--rM);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.exCard {
+  margin: 0 16px 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--rXL);
+  overflow: hidden;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.exCard.act {
+  border-color: rgba(255, 107, 43, 0.38);
+  box-shadow: 0 0 24px rgba(255, 107, 43, 0.07);
+}
+.exHdr {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+.exNum {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--t3);
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.exCard.act .exNum {
+  background: var(--olo);
+  border-color: var(--omd);
+  color: var(--orange);
+}
+.muscleTag {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--green);
+  background: var(--glo);
+  border: 1px solid rgba(57, 255, 20, 0.2);
+  padding: 2px 8px;
+  border-radius: 100px;
+}
+.exBody { display: none; }
+.exCard.act .exBody { display: block; }
+.mmSec {
+  border-top: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 14px 16px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.mmLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 2px;
+}
+.mmDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.setLogger {
+  border-top: 1px solid var(--border);
+  padding: 0 16px 16px;
+}
+.logHdr {
+  display: flex;
+  align-items: center;
+  padding: 10px 0 6px;
+  gap: 10px;
+}
+.logRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+.logRow + .logRow { border-top: 1px solid rgba(255, 255, 255, 0.04); }
+.spinner {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  overflow: hidden;
+  height: 40px;
+}
+.spBtn {
+  width: 36px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--t2);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.1s;
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+}
+.spBtn:active {
+  background: var(--border2);
+  color: var(--t1);
+}
+.spVal {
+  flex: 1;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--t1);
+}
+.spUnit {
+  font-size: 9px;
+  color: var(--t3);
+  font-weight: 600;
+  margin-right: 6px;
+}
+.chkBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  border: 1px solid var(--border);
+  background: var(--card2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.chkBtn.done {
+  background: var(--glo);
+  border-color: rgba(57, 255, 20, 0.3);
+}
+.addExBtn {
+  margin: 0 16px 16px;
+  border: 1.5px dashed var(--border2);
+  border-radius: var(--rL);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  color: var(--t3);
+  transition: all 0.2s;
+  background: transparent;
+  font-family: inherit;
+  width: calc(100% - 32px);
+}
+.addExBtn:active {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+.chevron {
+  transition: transform 0.25s;
+  flex-shrink: 0;
+}
+.chevron.open {
+  transform: rotate(180deg);
+}
+
+/* ─────────────── GYM ─────────────── */
+.gymHdr { padding: 20px 16px 16px; }
+.gymCard {
+  margin: 0 16px 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--rXL);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.gymCard.sel {
+  border-color: rgba(255, 107, 43, 0.35);
+  background: linear-gradient(135deg, #150d07 0%, #131313 100%);
+}
+.gymCard:active { transform: scale(0.98); }
+.gymBox {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  transition: all 0.2s;
+}
+.gymCard.sel .gymBox {
+  background: var(--olo);
+  border-color: var(--omd);
+}
+.addGym {
+  margin: 0 16px 8px;
+  border: 1.5px dashed var(--border2);
+  border-radius: var(--rXL);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  color: var(--t3);
+  transition: all 0.2s;
+  background: transparent;
+  font-family: inherit;
+  width: calc(100% - 32px);
+  text-align: left;
+}
+.addGym:active {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+.addGymIcon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.eqGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 0 16px;
+}
+.eqTog {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--rL);
+  padding: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.18s;
+}
+.eqTog.on {
+  background: var(--olo);
+  border-color: rgba(255, 107, 43, 0.28);
+}
+.eqTog:active { transform: scale(0.96); }
+.eqIco {
+  font-size: 20px;
+  flex-shrink: 0;
+  width: 26px;
+  text-align: center;
+}
+.togPip {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--t3);
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.eqTog.on .togPip {
+  background: var(--orange);
+  box-shadow: 0 0 6px var(--orange);
+}
+.routRow {
+  margin: 0 16px 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--rL);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.routRow:active { background: var(--card2); }
+.rPip {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.rPip.act {
+  background: var(--orange);
+  box-shadow: 0 0 8px rgba(255, 107, 43, 0.6);
+}
+.rPip.idle { background: var(--t3); }
+
+/* ─────────────── STATS ─────────────── */
+.statsHdr { padding: 20px 16px 16px; }
+.streakCard {
+  margin: 0 16px 10px;
+  background: linear-gradient(135deg, #0d1108 0%, #0f0f0f 100%);
+  border: 1px solid rgba(57, 255, 20, 0.15);
+  border-radius: var(--rXL);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.streakCard::after {
+  content: "";
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(57, 255, 20, 0.08) 0%, transparent 65%);
+  pointer-events: none;
+}
+.vchart {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 54px;
+}
+.vbarW {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  height: 100%;
+  justify-content: flex-end;
+}
+.vbar {
+  width: 100%;
+  border-radius: 5px 5px 2px 2px;
+  background: var(--border2);
+  min-height: 3px;
+}
+.vbar.today {
+  background: linear-gradient(180deg, var(--orange) 0%, #c04a10 100%);
+  box-shadow: 0 0 10px rgba(255, 107, 43, 0.4);
+}
+.prRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 0;
+}
+.prRow + .prRow { border-top: 1px solid var(--border); }
+
+/* ─────────────── LOG ─────────────── */
+.logHdrSec { padding: 20px 16px 16px; }
+.logEntry {
+  margin: 0 16px 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--rL);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.logEntry:active {
+  background: var(--card2);
+  transform: scale(0.99);
+}
+.logEntry.sample {
+  opacity: 0.7;
+  border-style: dashed;
+}
+
+/* ─────────────── MODALS ─────────────── */
+.mbg {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(10px);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.mbg.open {
+  opacity: 1;
+  pointer-events: all;
+}
+.msheet {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 28px 28px 0 0;
+  padding: 24px 20px 40px;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-height: 90%;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.msheet::-webkit-scrollbar { display: none; }
+.mbg.open .msheet { transform: translateY(0); }
+.handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border2);
+  margin: 0 auto 20px;
+}
+
+/* Wizard picks */
+.wPick {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--rL);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.18s;
+  margin-bottom: 10px;
+}
+.wPick.sel {
+  border-color: rgba(255, 107, 43, 0.5);
+  background: linear-gradient(135deg, #160d08 0%, #131313 100%);
+}
+.wPick:active { transform: scale(0.98); }
+.wBox {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.wPick.sel .wBox {
+  background: var(--olo);
+  border-color: var(--omd);
+}
+
+/* Inputs */
+.inp {
+  width: 100%;
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: var(--rM);
+  padding: 13px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--t1);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.inp:focus { border-color: var(--orange); }
+.inp::placeholder { color: var(--t3); }
+
+/* Add exercise search list */
+.exPickItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: all 0.15s;
+}
+.exPickItem:last-child { border-bottom: none; }
+.exPickItem:active { background: var(--card2); }
+.exPickDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--orange);
+  flex-shrink: 0;
+}
+
+/* Finish modal grid */
+.finGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin: 20px 0;
+}
+.finStat {
+  text-align: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 8px;
+}
+
+/* ─────────────── LIVE DOT ─────────────── */
+.liveDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: sm-pg 1.6s infinite;
+  display: inline-block;
+}
+@keyframes sm-pg {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.5); }
+  50% { box-shadow: 0 0 0 5px rgba(57, 255, 20, 0); }
+}
+
+/* ─────────────── EMOJI PICKER ─────────────── */
+.emojiGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.emojiOpt {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.emojiOpt.sel {
+  background: var(--olo);
+  border-color: var(--omd);
+}
+.emojiOpt:active { transform: scale(0.92); }
+
+.bspace { height: 16px; }
+
+/* Empty state */
+.sm-empty {
+  text-align: center;
+  padding: 40px 16px;
+}
