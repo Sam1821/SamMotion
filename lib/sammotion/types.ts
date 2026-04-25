@@ -120,6 +120,7 @@ export interface PR {
   date: string
   e1rm?: number
   exerciseId?: string
+  sample?: boolean
 }
 
 // ───────────────────────────── App state ─────────────────────────────
