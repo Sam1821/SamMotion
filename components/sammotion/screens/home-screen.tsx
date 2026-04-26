@@ -48,14 +48,14 @@ export function HomeScreen({
   return (
     <section className={`sm-scr ${active ? "on" : ""}`} id="s-home" aria-label="Home">
       <header className="sm-brand-bar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span className="sm-brand-mark" aria-label="SamMotion">
-          SAMMOTION
+        <span className="sm-brand-mark" aria-label="Xmotion">
+          XMOTION
         </span>
         <button
           type="button"
           className="signOutBtn"
           onClick={() => {
-            if (confirm("Sign out of SamMotion?")) signOut()
+            if (confirm("Sign out of Xmotion?")) signOut()
           }}
           aria-label="Sign out"
           title="Sign out"

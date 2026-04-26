@@ -3,15 +3,15 @@ import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'SamMotion',
+  title: 'Xmotion',
   description: 'Premium Fitness & Workout Tracker',
   generator: 'v0.app',
   manifest: '/manifest.json',
-  applicationName: 'SamMotion',
+  applicationName: 'Xmotion',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'SamMotion',
+    title: 'Xmotion',
   },
   icons: {
     icon: [
