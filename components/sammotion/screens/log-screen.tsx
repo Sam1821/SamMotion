@@ -1,14 +1,18 @@
 "use client"
 
+import { useState } from "react"
 import { getHistoryToShow } from "@/lib/sammotion/helpers"
 import { useStore } from "@/lib/sammotion/store"
 import { HistoryCard } from "../history-card"
+import { SessionDetailModal } from "../modals/session-detail-modal"
 
 export function LogScreen({ active }: { active: boolean }) {
   const { state } = useStore()
   const hist = getHistoryToShow(state)
   const sorted = [...hist].sort((a, b) => b.date.localeCompare(a.date))
   const realCount = state.history.filter((w) => !w.sample).length
+
+  const [openSessionId, setOpenSessionId] = useState<string | null>(null)
 
   return (
     <section className={`sm-scr ${active ? "on" : ""}`} aria-label="Log">
@@ -35,7 +39,11 @@ export function LogScreen({ active }: { active: boolean }) {
 
       <div>
         {sorted.length ? (
-          sorted.map((w) => <HistoryCard key={w.id} w={w} variant="log" />)
+          sorted.map((w) => (
+            <div key={w.id} onClick={() => setOpenSessionId(w.id)} style={{ cursor: "pointer" }}>
+              <HistoryCard w={w} variant="log" />
+            </div>
+          ))
         ) : (
           <div className="t13 c2" style={{ textAlign: "center", padding: 32 }}>
             No workouts logged yet.
@@ -43,6 +51,12 @@ export function LogScreen({ active }: { active: boolean }) {
         )}
       </div>
       <div className="bspace" />
+
+      <SessionDetailModal
+        open={openSessionId !== null}
+        onClose={() => setOpenSessionId(null)}
+        sessionId={openSessionId}
+      />
     </section>
   )
 }

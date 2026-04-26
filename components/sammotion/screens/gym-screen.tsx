@@ -1,8 +1,11 @@
 "use client"
 
+import { useState } from "react"
 import { ALL_EQ_IDS, EQUIPMENT_META, ROUTINES } from "@/lib/sammotion/data"
 import { getActiveGym, getExsForWorkout } from "@/lib/sammotion/helpers"
 import { useStore } from "@/lib/sammotion/store"
+import { GymDetailModal } from "../modals/gym-detail-modal"
+import { RoutineEditorModal } from "../modals/routine-editor-modal"
 
 export function GymScreen({
   active,
@@ -13,6 +16,10 @@ export function GymScreen({
 }) {
   const { state, selectGym, toggleEquipment, setActiveRoutine } = useStore()
   const gym = getActiveGym(state)
+  const [detailGymId, setDetailGymId] = useState<string | null>(null)
+  const [routineEditorOpen, setRoutineEditorOpen] = useState(false)
+
+  const allRoutines = [...ROUTINES, ...state.customRoutines]
 
   return (
     <section className={`sm-scr ${active ? "on" : ""}`} aria-label="Gym">
@@ -21,7 +28,7 @@ export function GymScreen({
         <div className="t26 w9" style={{ letterSpacing: "-.5px" }}>
           Gym Profiles
         </div>
-        <div className="t13 c2 mt4">Manage equipment &amp; routines</div>
+        <div className="t13 c2 mt4">Tap a gym to edit · tap Use to switch active</div>
       </div>
 
       <div>
@@ -31,7 +38,7 @@ export function GymScreen({
             className={`gymCard ${g.id === state.activeGymId ? "sel" : ""}`}
             role="button"
             tabIndex={0}
-            onClick={() => selectGym(g.id)}
+            onClick={() => setDetailGymId(g.id)}
           >
             <div className="gymBox">{g.emoji}</div>
             <div className="col f1 g4">
@@ -39,8 +46,17 @@ export function GymScreen({
                 <span className="t15 w7">{g.name}</span>
                 {g.id === state.activeGymId ? <span className="bdg bdo">Active</span> : null}
               </div>
-              <span className="t11 c2">{g.eq.length} equipment · 3 routines</span>
+              <span className="t11 c2">{g.eq.length} equipment items</span>
             </div>
+            {g.id !== state.activeGymId ? (
+              <button
+                type="button"
+                className="bdg"
+                onClick={(e) => { e.stopPropagation(); selectGym(g.id) }}
+              >
+                Use
+              </button>
+            ) : null}
             <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="var(--t3)" strokeWidth={2.5}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
@@ -87,10 +103,12 @@ export function GymScreen({
 
       <div className="shdr">
         <span className="stitle">Routines</span>
-        <span className="t11 c2 w5">3 built-in</span>
+        <button type="button" className="slink" onClick={() => setRoutineEditorOpen(true)}>
+          Manage →
+        </button>
       </div>
       <div>
-        {ROUTINES.map((r) => {
+        {allRoutines.map((r) => {
           const exCount = getExsForWorkout(state, state.activeGymId, r.id).length
           const on = r.id === state.activeRoutineId
           return (
@@ -104,7 +122,9 @@ export function GymScreen({
               <div className={`rPip ${on ? "act" : "idle"}`} />
               <div className="col f1 g4">
                 <span className="t15 w7">{r.name}</span>
-                <span className="t11 c2">3× per week · {exCount} exercises</span>
+                <span className="t11 c2">
+                  {r.isCustom ? "Custom" : "Built-in"} · {exCount} exercises available
+                </span>
               </div>
               {on ? (
                 <span className="bdg bdo" style={{ marginRight: 8 }}>
@@ -120,6 +140,16 @@ export function GymScreen({
       </div>
 
       <div className="bspace" />
+
+      <GymDetailModal
+        open={detailGymId !== null}
+        onClose={() => setDetailGymId(null)}
+        gymId={detailGymId}
+      />
+      <RoutineEditorModal
+        open={routineEditorOpen}
+        onClose={() => setRoutineEditorOpen(false)}
+      />
     </section>
   )
 }

@@ -16,17 +16,20 @@ export function WorkoutScreen({
   onStartWorkout,
   onFinish,
   onAddExercise,
+  onReplaceExercise,
   timerSec,
 }: {
   active: boolean
   onStartWorkout: () => void
   onFinish: () => void
   onAddExercise: () => void
+  onReplaceExercise: (index: number) => void
   timerSec: number
 }) {
-  const { state, updateCurrent } = useStore()
+  const { state, updateCurrent, reorderExercise, removeExercise } = useStore()
   const current = state.current
   const [openIdx, setOpenIdx] = useState<number>(0)
+  const [menuIdx, setMenuIdx] = useState<number>(-1)
 
   // Reset expanded card when workout changes or new ex added
   useEffect(() => {
@@ -150,22 +153,32 @@ export function WorkoutScreen({
               const primaryLabels = (ex.p || []).map(capitalize).join(" · ")
               return (
                 <div key={`${ex.id}_${i}`} className={`exCard ${isOpen ? "act" : ""}`}>
-                  <div
-                    className="exHdr"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setOpenIdx(isOpen ? -1 : i)}
-                  >
-                    <div className="exNum">{i + 1}</div>
-                    <div className="col f1 g4">
-                      <div className="row g8">
-                        <span className="t15 w7">{ex.n}</span>
-                        <span className="muscleTag">{primaryLabels}</span>
+                  <div className="exHdr" style={{ position: "relative" }}>
+                    <div
+                      className="row g8 f1"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setOpenIdx(isOpen ? -1 : i)}
+                    >
+                      <div className="exNum">{i + 1}</div>
+                      <div className="col f1 g4">
+                        <div className="row g8">
+                          <span className="t15 w7">{ex.n}</span>
+                          <span className="muscleTag">{primaryLabels}</span>
+                        </div>
+                        <span className="t11 c2">
+                          {ex.sets} sets × {ex.r} reps{ex.w ? ` · ${ex.w} kg` : ""}
+                        </span>
                       </div>
-                      <span className="t11 c2">
-                        {ex.sets} sets × {ex.r} reps{ex.w ? ` · ${ex.w} kg` : ""}
-                      </span>
                     </div>
+                    <button
+                      type="button"
+                      className="exMenuBtn"
+                      onClick={(e) => { e.stopPropagation(); setMenuIdx(menuIdx === i ? -1 : i) }}
+                      aria-label="Exercise options"
+                    >
+                      ⋮
+                    </button>
                     <svg
                       className={`chevron ${isOpen ? "open" : ""}`}
                       width={14}
@@ -174,9 +187,19 @@ export function WorkoutScreen({
                       fill="none"
                       stroke="var(--t3)"
                       strokeWidth={2.5}
+                      style={{ marginLeft: 4 }}
+                      onClick={() => setOpenIdx(isOpen ? -1 : i)}
                     >
                       <polyline points="6 9 12 15 18 9" />
                     </svg>
+                    {menuIdx === i ? (
+                      <div className="exMenu" onClick={(e) => e.stopPropagation()}>
+                        <button type="button" className="exMenuItem" disabled={i === 0} onClick={() => { reorderExercise(i, i - 1); setMenuIdx(-1) }}>↑ Move up</button>
+                        <button type="button" className="exMenuItem" disabled={i === current.exercises.length - 1} onClick={() => { reorderExercise(i, i + 1); setMenuIdx(-1) }}>↓ Move down</button>
+                        <button type="button" className="exMenuItem" onClick={() => { onReplaceExercise(i); setMenuIdx(-1) }}>↻ Replace</button>
+                        <button type="button" className="exMenuItem" style={{ color: "#c44" }} onClick={() => { removeExercise(i); setMenuIdx(-1) }}>✕ Remove</button>
+                      </div>
+                    ) : null}
                   </div>
                   <div className="exBody">
                     <div className="mmSec">

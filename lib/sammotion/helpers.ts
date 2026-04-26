@@ -1,7 +1,7 @@
 // SamMotion — pure helpers (no React, no Supabase).
 
 import { EX, ROUTINES, ROUTINE_PRIORITY, SAMPLE_HISTORY, SAMPLE_PRS } from "./data"
-import type { AppState, ExerciseWithId, Gym, RoutineId } from "./types"
+import type { AppState, ExerciseWithId, Gym, HistoryEntry, PR, RoutineId } from "./types"
 
 // ───────── Math ─────────
 // Brzycki estimated 1-rep max — well-behaved for reps ≤ 10.
@@ -119,6 +119,80 @@ export function getPRsToShow(state: AppState) {
   if (realKeys.length > 0) return state.prs
   if (state.isFirstTime) return SAMPLE_PRS as typeof state.prs
   return state.prs
+}
+
+// ───────── PR recompute ─────────
+// After a session is edited or deleted, walk all history and rebuild the PR map.
+// Top set per exercise wins by e1RM (Brzycki) — tie-breaker: heaviest weight.
+export function recomputePRsFromHistory(history: HistoryEntry[]): Record<string, PR> {
+  const out: Record<string, PR> = {}
+  for (const h of history) {
+    if (h.sample) continue
+    if (!h.details) continue
+    for (const ex of h.details) {
+      let bestE1rm = 0
+      let best: { w: number; r: number } | null = null
+      for (const set of ex.sets) {
+        if (!set.done) continue
+        const e1rm = calcE1RM(set.weight, set.reps)
+        if (e1rm > bestE1rm || (e1rm === bestE1rm && best && set.weight > best.w)) {
+          bestE1rm = e1rm
+          best = { w: set.weight, r: set.reps }
+        }
+      }
+      if (best) {
+        const existing = out[ex.id]
+        if (!existing || bestE1rm > (existing.e1rm || 0)) {
+          out[ex.id] = {
+            n: ex.n,
+            w: best.w,
+            r: best.r,
+            date: fmtDate(h.date),
+            e1rm: bestE1rm,
+            exerciseId: ex.id,
+          }
+        }
+      }
+    }
+  }
+  return out
+}
+
+// ───────── Per-exercise progression series for stats charts ─────────
+export type ChartMetric = "weight" | "e1rm" | "volume"
+export interface ChartPoint {
+  date: string  // ISO
+  value: number
+}
+
+export function getExerciseSeries(
+  history: HistoryEntry[],
+  exerciseId: string,
+  metric: ChartMetric,
+  rangeDays?: number
+): ChartPoint[] {
+  const cutoff = rangeDays ? Date.now() - rangeDays * 86400000 : 0
+  const points: ChartPoint[] = []
+  const sorted = [...history].filter((h) => !h.sample).sort((a, b) => a.date.localeCompare(b.date))
+
+  for (const h of sorted) {
+    if (cutoff && new Date(h.date).getTime() < cutoff) continue
+    if (!h.details) continue
+    const ex = h.details.find((d) => d.id === exerciseId)
+    if (!ex) continue
+    const doneSets = ex.sets.filter((s) => s.done)
+    if (doneSets.length === 0) continue
+    let v = 0
+    if (metric === "weight") {
+      v = Math.max(...doneSets.map((s) => s.weight))
+    } else if (metric === "e1rm") {
+      v = Math.max(...doneSets.map((s) => calcE1RM(s.weight, s.reps)))
+    } else {
+      v = doneSets.reduce((a, s) => a + s.weight * s.reps, 0)
+    }
+    points.push({ date: h.date, value: Math.round(v) })
+  }
+  return points
 }
 
 // ───────── Streak (ISO weeks, Mon = start) ─────────

@@ -21,6 +21,7 @@ export function SamMotionApp() {
   const [startOpen, setStartOpen] = useState(false)
   const [addGymOpen, setAddGymOpen] = useState(false)
   const [addExOpen, setAddExOpen] = useState(false)
+  const [replaceIndex, setReplaceIndex] = useState<number | null>(null)
   const [finishOpen, setFinishOpen] = useState(false)
   const [finishSummary, setFinishSummary] = useState<FinishSummary | null>(null)
 
@@ -102,7 +103,8 @@ export function SamMotionApp() {
             active={tab === "workout"}
             onStartWorkout={openStartWizard}
             onFinish={openFinish}
-            onAddExercise={() => setAddExOpen(true)}
+            onAddExercise={() => { setReplaceIndex(null); setAddExOpen(true) }}
+            onReplaceExercise={(i) => { setReplaceIndex(i); setAddExOpen(true) }}
             timerSec={timerSec}
           />
           <GymScreen active={tab === "gym"} onAddGym={() => setAddGymOpen(true)} />
@@ -117,7 +119,11 @@ export function SamMotionApp() {
             onStarted={() => setTab("workout")}
           />
           <AddGymModal open={addGymOpen} onClose={() => setAddGymOpen(false)} />
-          <AddExerciseModal open={addExOpen} onClose={() => setAddExOpen(false)} />
+          <AddExerciseModal
+            open={addExOpen}
+            onClose={() => { setAddExOpen(false); setReplaceIndex(null) }}
+            replaceIndex={replaceIndex}
+          />
           <FinishWorkoutModal
             open={finishOpen}
             onClose={() => setFinishOpen(false)}

@@ -9,10 +9,10 @@ import {
   type ReactNode,
 } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { ALL_EQ_IDS } from "./data"
-import { calcE1RM } from "./helpers"
+import { ALL_EQ_IDS, EX } from "./data"
+import { calcE1RM, recomputePRsFromHistory } from "./helpers"
 import type {
-  ActiveWorkout, AppState, EquipmentId, Gym, HistoryEntry, PR, Routine, RoutineId,
+  ActiveWorkout, AppState, EquipmentId, ExerciseWithId, Gym, HistoryEntry, PR, Routine, RoutineId,
 } from "./types"
 
 // ─────── Default state (used until first Supabase load) ───────
@@ -57,6 +57,11 @@ interface StoreCtx {
   updateCurrent: (fn: (prev: ActiveWorkout) => ActiveWorkout) => void
   cancelWorkout: () => void
   finishWorkout: (summary: { dur: number; vol: number; prsCount: number; newPRs: Record<string, PR & { e1rm: number }> }) => void
+  // workout exercise mutators
+  reorderExercise: (from: number, to: number) => void
+  removeExercise: (index: number) => void
+  replaceExercise: (index: number, newExerciseId: string) => void
+  addExerciseToWorkout: (exerciseId: string) => void
   // history
   deleteSession: (id: string) => void
   updateSession: (id: string, patch: Partial<HistoryEntry>) => void
@@ -345,11 +350,31 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     })
   }, [upsertHistory, upsertPR, upsertProfile])
 
+  // Wipe stale PRs in Supabase and write the new computed set. Keeps the prs table clean.
+  const syncPRs = useCallback(async (newPRs: Record<string, PR>) => {
+    const uid = userIdRef.current
+    if (!uid) return
+    // Replace strategy: delete-all + bulk upsert.
+    await supabase.from("prs").delete().eq("user_id", uid)
+    const rows = Object.entries(newPRs).map(([exerciseId, pr]) => ({
+      user_id: uid, exercise_id: exerciseId, n: pr.n ?? null,
+      w: pr.w, r: pr.r, e1rm: pr.e1rm ?? null, date: pr.date,
+    }))
+    if (rows.length > 0) {
+      const { error } = await supabase.from("prs").upsert(rows)
+      if (error) setError(error.message)
+    }
+  }, [supabase])
+
   const deleteSession = useCallback((id: string) => {
-    setState((s) => ({ ...s, history: s.history.filter((h) => h.id !== id) }))
-    removeHistory(id)
-    // Note: PRs intentionally NOT recomputed here — Pass 2 will add a "recompute PRs from history" pass.
-  }, [removeHistory])
+    setState((s) => {
+      const remaining = s.history.filter((h) => h.id !== id)
+      const newPRs = recomputePRsFromHistory(remaining)
+      removeHistory(id)
+      syncPRs(newPRs)
+      return { ...s, history: remaining, prs: newPRs }
+    })
+  }, [removeHistory, syncPRs])
 
   const updateSession = useCallback((id: string, patch: Partial<HistoryEntry>) => {
     setState((s) => {
@@ -362,10 +387,84 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         patch.details.forEach((d) => d.sets.forEach((set) => { if (set.done) vol += set.weight * set.reps }))
         next.vol = Math.round(vol)
       }
+      const newHistory = s.history.map((x) => (x.id === id ? next : x))
+      const newPRs = recomputePRsFromHistory(newHistory)
       upsertHistory(next)
-      return { ...s, history: s.history.map((x) => (x.id === id ? next : x)) }
+      syncPRs(newPRs)
+      return { ...s, history: newHistory, prs: newPRs }
     })
-  }, [upsertHistory])
+  }, [upsertHistory, syncPRs])
+
+  // ─────── Active-workout exercise mutators ───────
+  const reorderExercise = useCallback((from: number, to: number) => {
+    setState((s) => {
+      if (!s.current) return s
+      const exs = [...s.current.exercises]
+      if (from < 0 || to < 0 || from >= exs.length || to >= exs.length) return s
+      const [moved] = exs.splice(from, 1)
+      exs.splice(to, 0, moved)
+      // Reindex set keys: sets are keyed by `${exerciseIndex}_${setIndex}` so moves shuffle them.
+      const newSets: Record<string, typeof s.current.sets[string]> = {}
+      Object.entries(s.current.sets).forEach(([k, v]) => {
+        const [eiStr, siStr] = k.split("_")
+        const ei = parseInt(eiStr, 10)
+        let newEi = ei
+        if (ei === from) newEi = to
+        else if (from < to && ei > from && ei <= to) newEi = ei - 1
+        else if (from > to && ei >= to && ei < from) newEi = ei + 1
+        newSets[`${newEi}_${siStr}`] = v
+      })
+      return { ...s, current: { ...s.current, exercises: exs, sets: newSets } }
+    })
+  }, [])
+
+  const removeExercise = useCallback((index: number) => {
+    setState((s) => {
+      if (!s.current) return s
+      const exs = s.current.exercises.filter((_, i) => i !== index)
+      const newSets: Record<string, typeof s.current.sets[string]> = {}
+      Object.entries(s.current.sets).forEach(([k, v]) => {
+        const [eiStr, siStr] = k.split("_")
+        const ei = parseInt(eiStr, 10)
+        if (ei === index) return
+        const newEi = ei > index ? ei - 1 : ei
+        newSets[`${newEi}_${siStr}`] = v
+      })
+      return { ...s, current: { ...s.current, exercises: exs, sets: newSets } }
+    })
+  }, [])
+
+  const replaceExercise = useCallback((index: number, newExerciseId: string) => {
+    setState((s) => {
+      if (!s.current) return s
+      const def = EX[newExerciseId]
+      if (!def) return s
+      const replacement: ExerciseWithId = { id: newExerciseId, ...def }
+      const exs = s.current.exercises.map((e, i) => (i === index ? replacement : e))
+      // Drop any previously logged sets for this slot since exercise changed.
+      const newSets: Record<string, typeof s.current.sets[string]> = {}
+      Object.entries(s.current.sets).forEach(([k, v]) => {
+        const [eiStr] = k.split("_")
+        if (parseInt(eiStr, 10) !== index) newSets[k] = v
+      })
+      return { ...s, current: { ...s.current, exercises: exs, sets: newSets } }
+    })
+  }, [])
+
+  const addExerciseToWorkout = useCallback((exerciseId: string) => {
+    setState((s) => {
+      if (!s.current) return s
+      const def = EX[exerciseId]
+      if (!def) return s
+      return {
+        ...s,
+        current: {
+          ...s.current,
+          exercises: [...s.current.exercises, { id: exerciseId, ...def }],
+        },
+      }
+    })
+  }, [])
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut()
@@ -380,6 +479,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     selectGym, toggleEquipment, addGym, updateGym, deleteGym,
     setActiveRoutine, addCustomRoutine, updateCustomRoutine, deleteCustomRoutine,
     startWorkout, updateCurrent, cancelWorkout, finishWorkout,
+    reorderExercise, removeExercise, replaceExercise, addExerciseToWorkout,
     deleteSession, updateSession,
     signOut,
   }

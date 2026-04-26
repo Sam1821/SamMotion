@@ -921,3 +921,117 @@
   text-align: center;
   padding: 40px 16px;
 }
+
+/* ─── Pass 2: sign-out, exercise menu, session detail, routine editor ─── */
+
+.signOutBtn {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--t3);
+  width: 32px; height: 32px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 120ms, border-color 120ms;
+}
+.signOutBtn:hover {
+  color: var(--orange);
+  border-color: var(--orange);
+}
+
+/* Exercise menu (3-dot menu on each workout exercise card) */
+.exMenuBtn {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--t2);
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: 4px;
+}
+.exMenuBtn:hover { background: var(--card2); color: var(--orange); }
+.exMenu {
+  position: absolute;
+  top: 100%; right: 8px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+  z-index: 5;
+  min-width: 140px;
+  box-shadow: 0 6px 16px rgba(0,0,0,.4);
+}
+.exMenuItem {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--t1);
+  font-size: 13px;
+  text-align: left;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.exMenuItem:hover:not(:disabled) { background: var(--bg); }
+.exMenuItem:disabled { opacity: .35; cursor: not-allowed; }
+
+/* Session detail modal — per-exercise + per-set rows */
+.sdetails { max-height: 60vh; overflow-y: auto; padding-bottom: 8px; }
+.sdEx {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+.sdRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+.sdInp {
+  appearance: none;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--t1);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 13px;
+  width: 60px;
+  text-align: center;
+}
+
+/* Routine editor row */
+.reRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+.reRow .bdg:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* Generic input — reused across modals */
+.inp {
+  appearance: none;
+  width: 100%;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  color: var(--t1);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 14px;
+}
+.inp:focus { outline: none; border-color: var(--orange); }
