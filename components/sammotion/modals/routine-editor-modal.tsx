@@ -115,20 +115,20 @@ export function RoutineEditorModal({
 
   // ─── Edit view ───
   if (mode === "edit" && editing) {
+    // Capture so TS narrowing survives into closures.
+    const e: Routine = editing
     function patchEditing(p: Partial<Routine>) {
       setEditing((prev) => (prev ? { ...prev, ...p } : prev))
     }
     function moveEx(from: number, to: number) {
-      if (!editing) return
-      const ids = [...editing.exerciseIds]
+      const ids = [...e.exerciseIds]
       if (from < 0 || to < 0 || from >= ids.length || to >= ids.length) return
       const [m] = ids.splice(from, 1)
       ids.splice(to, 0, m)
       patchEditing({ exerciseIds: ids })
     }
     function removeEx(idx: number) {
-      if (!editing) return
-      patchEditing({ exerciseIds: editing.exerciseIds.filter((_, i) => i !== idx) })
+      patchEditing({ exerciseIds: e.exerciseIds.filter((_, i) => i !== idx) })
     }
 
     return (
@@ -139,11 +139,11 @@ export function RoutineEditorModal({
             type="button"
             className="bdg bdo"
             onClick={() => {
-              if (state.customRoutines.find((x) => x.id === editing.id)) {
-                updateCustomRoutine(editing.id, editing)
+              if (state.customRoutines.find((x) => x.id === e.id)) {
+                updateCustomRoutine(e.id, e)
               } else {
-                addCustomRoutine(editing)
-                setActiveRoutine(editing.id)
+                addCustomRoutine(e)
+                setActiveRoutine(e.id)
               }
               setMode("list")
             }}
@@ -155,21 +155,21 @@ export function RoutineEditorModal({
         <div className="t10 w7 c2 upper mb8" style={{ letterSpacing: ".6px" }}>Routine Name</div>
         <input
           className="inp mb16"
-          value={editing.name}
+          value={e.name}
           onChange={(e) => patchEditing({ name: e.target.value })}
           maxLength={32}
         />
 
         <div className="row jb mb8">
-          <span className="t10 w7 c2 upper" style={{ letterSpacing: ".6px" }}>Exercises ({editing.exerciseIds.length})</span>
+          <span className="t10 w7 c2 upper" style={{ letterSpacing: ".6px" }}>Exercises ({e.exerciseIds.length})</span>
           <button type="button" className="bdg bdo" onClick={() => setMode("picker")}>+ Add</button>
         </div>
 
-        {editing.exerciseIds.length === 0 ? (
+        {e.exerciseIds.length === 0 ? (
           <div className="t11 c2" style={{ textAlign: "center", padding: 12 }}>No exercises yet — tap Add.</div>
         ) : (
           <div className="col g4 mb16">
-            {editing.exerciseIds.map((id, idx) => {
+            {e.exerciseIds.map((id, idx) => {
               const ex = EX[id]
               if (!ex) return null
               return (
@@ -177,7 +177,7 @@ export function RoutineEditorModal({
                   <span className="t11 w7 c3" style={{ width: 18 }}>{idx + 1}</span>
                   <span className="t13 w6 f1">{ex.n}</span>
                   <button type="button" className="bdg" onClick={() => moveEx(idx, idx - 1)} disabled={idx === 0}>↑</button>
-                  <button type="button" className="bdg" onClick={() => moveEx(idx, idx + 1)} disabled={idx === editing.exerciseIds.length - 1}>↓</button>
+                  <button type="button" className="bdg" onClick={() => moveEx(idx, idx + 1)} disabled={idx === e.exerciseIds.length - 1}>↓</button>
                   <button type="button" className="bdg" style={{ color: "#c44" }} onClick={() => removeEx(idx)}>✕</button>
                 </div>
               )
@@ -190,7 +190,9 @@ export function RoutineEditorModal({
 
   // ─── Picker view ───
   if (mode === "picker" && editing) {
-    const existing = new Set(editing.exerciseIds)
+    // Local capture so narrowing survives into closures.
+    const e: Routine = editing
+    const existing = new Set(e.exerciseIds)
     return (
       <ModalSheet open={open} onClose={onClose}>
         <div className="row jb mb6">

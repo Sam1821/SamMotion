@@ -34,8 +34,10 @@ export function GymDetailModal({
 
   if (!gym) return <ModalSheet open={open} onClose={onClose} />
 
-  const sessionsHere = state.history.filter((h) => !h.sample && h.gymId === gym.id).length
-  const isActive = gym.id === state.activeGymId
+  // Capture in a const so TS narrowing survives into closures.
+  const g = gym
+  const sessionsHere = state.history.filter((h) => !h.sample && h.gymId === g.id).length
+  const isActive = g.id === state.activeGymId
   const isOnlyGym = state.gyms.length <= 1
 
   function toggleEq(id: EquipmentId) {
@@ -43,25 +45,23 @@ export function GymDetailModal({
   }
 
   function save() {
-    if (!gym) return
-    const trimmed = name.trim() || gym.name
-    updateGym(gym.id, { name: trimmed, emoji, eq: equipment })
+    const trimmed = name.trim() || g.name
+    updateGym(g.id, { name: trimmed, emoji, eq: equipment })
     onClose()
   }
 
   function handleDelete() {
-    if (!gym || isOnlyGym) return
+    if (isOnlyGym) return
     if (!confirmDelete) {
       setConfirmDelete(true)
       return
     }
-    deleteGym(gym.id)
+    deleteGym(g.id)
     onClose()
   }
 
   function handleSetActive() {
-    if (!gym) return
-    selectGym(gym.id)
+    selectGym(g.id)
     onClose()
   }
 
@@ -81,7 +81,7 @@ export function GymDetailModal({
             style={{ marginBottom: 4 }}
           />
           <div className="t11 c2">
-            {sessionsHere} session{sessionsHere === 1 ? "" : "s"} logged · {gym.eq.length} equipment
+            {sessionsHere} session{sessionsHere === 1 ? "" : "s"} logged · {g.eq.length} equipment
             {isActive ? <span className="bdg bdo" style={{ marginLeft: 6 }}>Active</span> : null}
           </div>
         </div>

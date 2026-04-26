@@ -33,7 +33,9 @@ export function SessionDetailModal({
 
   if (!session) return <ModalSheet open={open} onClose={onClose} />
 
-  const isSample = session.sample
+  // Capture in a const so TypeScript's narrowing survives into closures below.
+  const sess: HistoryEntry = session
+  const isSample = sess.sample
   const totalVol = details.reduce((a, ex) => a + ex.sets.reduce((b, s) => b + (s.done ? s.weight * s.reps : 0), 0), 0)
   const totalSets = details.reduce((a, ex) => a + ex.sets.filter((s) => s.done).length, 0)
 
@@ -48,7 +50,7 @@ export function SessionDetailModal({
   }
 
   function save() {
-    updateSession(session.id, { details })
+    updateSession(sess.id, { details })
     setEditing(false)
     onClose()
   }
@@ -58,7 +60,7 @@ export function SessionDetailModal({
       setConfirmDelete(true)
       return
     }
-    deleteSession(session.id)
+    deleteSession(sess.id)
     onClose()
   }
 
@@ -67,7 +69,7 @@ export function SessionDetailModal({
       <div className="row jb mb6">
         <div>
           <div className="t10 w7 c2 upper" style={{ letterSpacing: ".6px" }}>Session Detail</div>
-          <div className="t17 w8 mt4">{session.routine || "Workout"}</div>
+          <div className="t17 w8 mt4">{sess.routine || "Workout"}</div>
         </div>
         {!isSample && !editing ? (
           <button type="button" className="bdg bdo" onClick={() => setEditing(true)}>
@@ -76,7 +78,7 @@ export function SessionDetailModal({
         ) : null}
       </div>
       <div className="t11 c2 mb16">
-        {fmtDate(session.date)} · {fmtDay(session.date)} · {fmtDur(session.dur)} · {fmtVol(totalVol)}kg · {totalSets} sets
+        {fmtDate(sess.date)} · {fmtDay(sess.date)} · {fmtDur(sess.dur)} · {fmtVol(totalVol)}kg · {totalSets} sets
       </div>
 
       {isSample ? (
@@ -148,7 +150,7 @@ export function SessionDetailModal({
                 type="button"
                 className="btnP"
                 style={{ background: "var(--card2)", color: "var(--t2)", border: "1px solid var(--border)", boxShadow: "none", flex: 0, padding: "0 16px" }}
-                onClick={() => { setEditing(false); setDetails(session.details ? JSON.parse(JSON.stringify(session.details)) : []) }}
+                onClick={() => { setEditing(false); setDetails(sess.details ? JSON.parse(JSON.stringify(sess.details)) : []) }}
               >
                 Cancel
               </button>
