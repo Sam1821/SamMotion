@@ -202,6 +202,28 @@ export function WorkoutScreen({
                     ) : null}
                   </div>
                   <div className="exBody">
+                    {/* How-to demo: form image + YouTube search link */}
+                    <div className="exDemo">
+                      {ex.gif ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          className="exDemoImg"
+                          src={ex.gif}
+                          alt={`${ex.n} form`}
+                          loading="lazy"
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none" }}
+                        />
+                      ) : null}
+                      <a
+                        className="exDemoBtn"
+                        href={`https://www.youtube.com/results?search_query=${encodeURIComponent(ex.n + " proper form")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <svg width={14} height={14} viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                        Watch demo
+                      </a>
+                    </div>
                     <div className="mmSec">
                       <MuscleSVG primary={ex.p || []} secondary={ex.s || []} />
                       <div className="col f1">

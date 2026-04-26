@@ -1035,3 +1035,40 @@
   font-size: 14px;
 }
 .inp:focus { outline: none; border-color: var(--orange); }
+
+/* Exercise demo block (form image + YouTube link) inside expanded workout cards */
+.exDemo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.exDemoImg {
+  width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: block;
+}
+.exDemoBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  background: rgba(255, 0, 0, 0.12);
+  color: #ff5050;
+  border: 1px solid rgba(255, 80, 80, 0.4);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 120ms;
+}
+.exDemoBtn:hover {
+  background: rgba(255, 0, 0, 0.2);
+  color: #ff7a7a;
+}

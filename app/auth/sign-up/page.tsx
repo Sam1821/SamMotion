@@ -53,8 +53,8 @@ export default function SignUpPage() {
       <div className="sm-auth-card">
         <div className="sm-auth-brand">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/icon-192.png?v=2" alt="SamMotion" />
-          <h1>SAMMOTION</h1>
+          <img src="/icon-192.png?v=2" alt="XMotion" />
+          <h1>XMOTION</h1>
           <p>Train smarter. Track everything.</p>
         </div>
 
