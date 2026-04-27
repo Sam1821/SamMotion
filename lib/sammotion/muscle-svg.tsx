@@ -43,7 +43,7 @@ const MUSCLE_MAP: Record<MuscleId, Muscle> = {
   quads_vm: "quadriceps",
   hamstrings_bf: "hamstring",
   hamstrings_sm: "hamstring",
-  adductors: "adductors",
+  adductors: "adductor",   // library uses singular for this group
   abductors: "abductors",
   calves_gastroc: "calves",
   calves_soleus: "calves",
