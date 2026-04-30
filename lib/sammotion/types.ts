@@ -87,7 +87,20 @@ export interface ActiveWorkout {
   startTime: number
   exercises: ExerciseWithId[]
   sets: Record<string, SetLog>  // key: `${exerciseIndex}_${setIndex}`
+  setCounts?: Record<number, number>  // override default ex.sets per index — lets users add extra sets mid-workout
+  customName?: string                 // user-typed name (overrides routine.name in UI)
+  splitId?: string                    // which split was picked when starting
   notes?: string
+}
+
+// ───────────────────────────── Splits (training programs) ─────────────────────────────
+// A Split groups multiple Routines into a coherent weekly program.
+export interface Split {
+  id: string
+  name: string
+  desc: string
+  daysPerWeek: number
+  routineIds: RoutineId[]   // ordered list of the routines in this split
 }
 
 // ───────────────────────────── History ─────────────────────────────

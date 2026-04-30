@@ -4,7 +4,7 @@
 // Pattern: https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/<slug>/0.jpg
 // (slugs are the canonical names from that repo; we hand-mapped a curated 100+ subset.)
 
-import type { EquipmentDef, ExerciseDict, HistoryEntry, MuscleGroup, MuscleId, PR, Routine } from "./types"
+import type { EquipmentDef, ExerciseDict, HistoryEntry, MuscleGroup, MuscleId, PR, Routine, Split } from "./types"
 
 const FE_BASE = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises"
 
@@ -224,43 +224,95 @@ export const EX: ExerciseDict = {
 
 // ──────────────────────────── Built-in routines ────────────────────────────
 export const ROUTINES: Routine[] = [
-  {
-    id: "sl",
-    name: "Shoulder + Leg",
-    tags: ["Shoulders", "Legs", "Glutes"],
-    daysPerWeek: 1,
-    exerciseIds: ["ohp", "lat_raise", "rear_fly", "squat", "rdl", "leg_press", "calf_stand"],
-  },
-  {
-    id: "ct",
-    name: "Chest + Tricep",
-    tags: ["Chest", "Triceps"],
-    daysPerWeek: 1,
-    exerciseIds: ["bench", "bench_inc", "db_fly", "dip_tri", "ext_skull", "push_down"],
-  },
-  {
-    id: "bb",
-    name: "Back + Bicep",
-    tags: ["Back", "Biceps"],
-    daysPerWeek: 1,
-    exerciseIds: ["deadlift", "pullup", "row_bb", "lat_pulldown", "curl_bb", "curl_ham"],
-  },
+  // Body-part split (what used to be the only routines)
+  { id: "sl", name: "Shoulder + Leg",  tags: ["Shoulders","Legs","Glutes"], daysPerWeek: 1,
+    exerciseIds: ["ohp","lat_raise","rear_fly","squat","rdl","leg_press","calf_stand"] },
+  { id: "ct", name: "Chest + Tricep",  tags: ["Chest","Triceps"], daysPerWeek: 1,
+    exerciseIds: ["bench","bench_inc","db_fly","dip_tri","ext_skull","push_down"] },
+  { id: "bb", name: "Back + Bicep",    tags: ["Back","Biceps"], daysPerWeek: 1,
+    exerciseIds: ["deadlift","pullup","row_bb","lat_pulldown","curl_bb","curl_ham"] },
+
+  // Push / Pull / Legs
+  { id: "push",  name: "Push Day",     tags: ["Chest","Shoulders","Triceps"], daysPerWeek: 1,
+    exerciseIds: ["bench","ohp_db","db_inc","lat_raise","dip_tri","push_down"] },
+  { id: "pull",  name: "Pull Day",     tags: ["Back","Biceps"], daysPerWeek: 1,
+    exerciseIds: ["deadlift","pullup","row_bb","lat_pulldown","curl_bb","curl_ham"] },
+  { id: "legs",  name: "Leg Day",      tags: ["Quads","Hams","Glutes","Calves"], daysPerWeek: 1,
+    exerciseIds: ["squat","rdl","leg_press","leg_curl","calf_stand"] },
+
+  // Upper / Lower
+  { id: "upper", name: "Upper Body",   tags: ["Chest","Back","Shoulders","Arms"], daysPerWeek: 1,
+    exerciseIds: ["bench","row_bb","ohp_db","pullup","curl_bb","dip_tri"] },
+  { id: "lower", name: "Lower Body",   tags: ["Legs","Glutes"], daysPerWeek: 1,
+    exerciseIds: ["squat","rdl","leg_press","hip_thrust","calf_stand"] },
+
+  // Full Body
+  { id: "fb",    name: "Full Body",    tags: ["Full Body"], daysPerWeek: 1,
+    exerciseIds: ["squat","bench","row_bb","ohp_db","rdl","plank"] },
+
+  // 5-day Bro Split
+  { id: "bro_chest",     name: "Chest Day",    tags: ["Chest"], daysPerWeek: 1,
+    exerciseIds: ["bench","bench_inc","db_fly","dip_chest","cable_fly","push_up"] },
+  { id: "bro_back",      name: "Back Day",     tags: ["Back"], daysPerWeek: 1,
+    exerciseIds: ["deadlift","pullup","row_bb","lat_pulldown","row_db","shrug_bb"] },
+  { id: "bro_legs",      name: "Bro Leg Day",  tags: ["Legs"], daysPerWeek: 1,
+    exerciseIds: ["squat","rdl","leg_press","leg_curl","leg_ext","calf_stand"] },
+  { id: "bro_shoulders", name: "Shoulder Day", tags: ["Shoulders"], daysPerWeek: 1,
+    exerciseIds: ["ohp_db","lat_raise","front_raise","rear_fly","upright_row"] },
+  { id: "bro_arms",      name: "Arm Day",      tags: ["Biceps","Triceps"], daysPerWeek: 1,
+    exerciseIds: ["curl_bb","curl_ham","dip_tri","ext_skull","push_down","curl_inc"] },
+]
+
+// ──────────────────────────── Built-in splits (training programs) ────────────────────────────
+export const SPLITS: Split[] = [
+  { id: "body_part_3",
+    name: "3-Day Body-Part Split",
+    desc: "Hits each muscle group once a week. Beginner-friendly.",
+    daysPerWeek: 3,
+    routineIds: ["sl", "ct", "bb"] },
+  { id: "ppl_3",
+    name: "Push / Pull / Legs",
+    desc: "Classic 3-day rotation by movement pattern. Balanced and proven.",
+    daysPerWeek: 3,
+    routineIds: ["push", "pull", "legs"] },
+  { id: "upper_lower",
+    name: "Upper / Lower",
+    desc: "Train upper and lower body twice a week each. Great for intermediates.",
+    daysPerWeek: 4,
+    routineIds: ["upper", "lower"] },
+  { id: "full_body",
+    name: "Full Body",
+    desc: "Hit everything every session. Time-efficient, ideal for busy weeks.",
+    daysPerWeek: 3,
+    routineIds: ["fb"] },
+  { id: "bro_5",
+    name: "5-Day Bro Split",
+    desc: "Dedicated day per muscle group. High volume, classic bodybuilder style.",
+    daysPerWeek: 5,
+    routineIds: ["bro_chest", "bro_back", "bro_legs", "bro_shoulders", "bro_arms"] },
 ]
 
 // Priority order used when filtering by routine for a gym (most desired first).
 export const ROUTINE_PRIORITY: Record<string, string[]> = {
-  sl: [
-    "ohp","ohp_db","arnold","shoulder_m","lat_raise","lat_raise_c","front_raise","rear_fly","upright_row","face_pull",
-    "squat","squat_goblet","bulgarian","lunge","leg_press","hack_squat","leg_ext","rdl","rdl_db","leg_curl","hip_thrust","calf_stand","calf_seated","calf_db",
-  ],
-  ct: [
-    "bench","bench_inc","bench_dec","db_bench","db_inc","db_fly","cable_fly","pec_deck","push_up","dip_chest","chest_press_m",
-    "dip_tri","bench_close","push_diamond","push_down","push_rope","ext_oh","ext_skull","kickback",
-  ],
-  bb: [
-    "deadlift","pullup","chinup","lat_pulldown","row_bb","row_db","row_cable","row_tbar","shrug_bb","shrug_db","face_pull","pullover","back_ext",
-    "curl_bb","curl_db","curl_ham","curl_inc","curl_pre","curl_cable","curl_conc",
-  ],
+  // Body-part split
+  sl: ["ohp","ohp_db","arnold","shoulder_m","lat_raise","lat_raise_c","front_raise","rear_fly","upright_row","face_pull","squat","squat_goblet","bulgarian","lunge","leg_press","hack_squat","leg_ext","rdl","rdl_db","leg_curl","hip_thrust","calf_stand","calf_seated","calf_db"],
+  ct: ["bench","bench_inc","bench_dec","db_bench","db_inc","db_fly","cable_fly","pec_deck","push_up","dip_chest","chest_press_m","dip_tri","bench_close","push_diamond","push_down","push_rope","ext_oh","ext_skull","kickback"],
+  bb: ["deadlift","pullup","chinup","lat_pulldown","row_bb","row_db","row_cable","row_tbar","shrug_bb","shrug_db","face_pull","pullover","back_ext","curl_bb","curl_db","curl_ham","curl_inc","curl_pre","curl_cable","curl_conc"],
+  // PPL
+  push:  ["bench","bench_inc","db_bench","db_inc","ohp","ohp_db","arnold","lat_raise","front_raise","dip_tri","push_down","push_rope","ext_skull","ext_oh","db_fly","cable_fly"],
+  pull:  ["deadlift","pullup","chinup","row_bb","row_db","row_cable","lat_pulldown","curl_bb","curl_db","curl_ham","curl_pre","face_pull","shrug_bb"],
+  legs:  ["squat","squat_goblet","rdl","rdl_db","leg_press","lunge","bulgarian","leg_curl","leg_ext","hip_thrust","calf_stand","calf_seated"],
+  // Upper/Lower
+  upper: ["bench","bench_inc","row_bb","row_db","pullup","ohp","ohp_db","lat_pulldown","curl_bb","dip_tri","push_down","face_pull"],
+  lower: ["squat","rdl","leg_press","hip_thrust","lunge","leg_curl","leg_ext","calf_stand"],
+  // Full Body
+  fb:    ["squat","bench","row_bb","deadlift","ohp","pullup","rdl","plank","leg_press","ohp_db"],
+  // Bro Split
+  bro_chest:     ["bench","bench_inc","bench_dec","db_bench","db_inc","db_fly","cable_fly","pec_deck","push_up","dip_chest","chest_press_m"],
+  bro_back:      ["deadlift","pullup","chinup","lat_pulldown","row_bb","row_db","row_cable","shrug_bb","shrug_db","back_ext","face_pull"],
+  bro_legs:      ["squat","rdl","leg_press","hack_squat","leg_ext","leg_curl","leg_curl_seat","lunge","bulgarian","calf_stand","calf_seated"],
+  bro_shoulders: ["ohp","ohp_db","arnold","lat_raise","lat_raise_c","front_raise","rear_fly","upright_row","face_pull"],
+  bro_arms:      ["curl_bb","curl_db","curl_ham","curl_inc","curl_pre","curl_cable","curl_conc","dip_tri","bench_close","ext_skull","ext_oh","push_down","push_rope","kickback"],
 }
 
 // Default sample data shown for first-time users (cleared on first real workout).

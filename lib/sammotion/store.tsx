@@ -62,6 +62,10 @@ interface StoreCtx {
   removeExercise: (index: number) => void
   replaceExercise: (index: number, newExerciseId: string) => void
   addExerciseToWorkout: (exerciseId: string) => void
+  addSetToExercise: (index: number) => void
+  removeSetFromExercise: (index: number) => void
+  setWorkoutName: (name: string) => void
+  saveCurrentAsRoutine: (name: string) => void
   // history
   deleteSession: (id: string) => void
   updateSession: (id: string, patch: Partial<HistoryEntry>) => void
@@ -466,6 +470,56 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  const addSetToExercise = useCallback((index: number) => {
+    setState((s) => {
+      if (!s.current) return s
+      const ex = s.current.exercises[index]
+      if (!ex) return s
+      const counts = { ...(s.current.setCounts || {}) }
+      const current = counts[index] ?? (ex.sets || 3)
+      counts[index] = current + 1
+      return { ...s, current: { ...s.current, setCounts: counts } }
+    })
+  }, [])
+
+  const removeSetFromExercise = useCallback((index: number) => {
+    setState((s) => {
+      if (!s.current) return s
+      const ex = s.current.exercises[index]
+      if (!ex) return s
+      const counts = { ...(s.current.setCounts || {}) }
+      const current = counts[index] ?? (ex.sets || 3)
+      if (current <= 1) return s  // never go below 1 set
+      counts[index] = current - 1
+      // Drop the trailing set log so totals are consistent.
+      const newSets = { ...s.current.sets }
+      delete newSets[`${index}_${current - 1}`]
+      return { ...s, current: { ...s.current, setCounts: counts, sets: newSets } }
+    })
+  }, [])
+
+  const setWorkoutName = useCallback((name: string) => {
+    setState((s) => (s.current ? { ...s, current: { ...s.current, customName: name } } : s))
+  }, [])
+
+  const saveCurrentAsRoutine = useCallback((name: string) => {
+    const trimmed = name.trim()
+    if (!trimmed) return
+    setState((s) => {
+      if (!s.current || s.current.exercises.length === 0) return s
+      const newRoutine: Routine = {
+        id: "r_" + Date.now(),
+        name: trimmed,
+        tags: [],
+        exerciseIds: s.current.exercises.map((e) => e.id),
+        daysPerWeek: 1,
+        isCustom: true,
+      }
+      upsertRoutine(newRoutine)
+      return { ...s, customRoutines: [...s.customRoutines, newRoutine] }
+    })
+  }, [upsertRoutine])
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut()
     window.location.href = "/auth/login"
@@ -480,6 +534,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setActiveRoutine, addCustomRoutine, updateCustomRoutine, deleteCustomRoutine,
     startWorkout, updateCurrent, cancelWorkout, finishWorkout,
     reorderExercise, removeExercise, replaceExercise, addExerciseToWorkout,
+    addSetToExercise, removeSetFromExercise, setWorkoutName, saveCurrentAsRoutine,
     deleteSession, updateSession,
     signOut,
   }

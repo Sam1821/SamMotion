@@ -749,18 +749,23 @@
 }
 
 /* ─────────────── MODALS ─────────────── */
+/* position: fixed so the sheet always covers the viewport, even when the
+   underlying screen has been scrolled. Previously absolute → modal floated
+   above the page top whenever the user opened it from a scrolled section. */
 .mbg {
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.88);
   backdrop-filter: blur(10px);
   z-index: 200;
   display: flex;
   align-items: flex-end;
+  justify-content: center;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s;
 }
+.mbg .msheet { max-width: 480px; }
 .mbg.open {
   opacity: 1;
   pointer-events: all;

@@ -26,10 +26,12 @@ export function WorkoutScreen({
   onReplaceExercise: (index: number) => void
   timerSec: number
 }) {
-  const { state, updateCurrent, reorderExercise, removeExercise } = useStore()
+  const { state, updateCurrent, reorderExercise, removeExercise, addSetToExercise, removeSetFromExercise, setWorkoutName } = useStore()
   const current = state.current
   const [openIdx, setOpenIdx] = useState<number>(0)
   const [menuIdx, setMenuIdx] = useState<number>(-1)
+  const [editingName, setEditingName] = useState(false)
+  const [nameDraft, setNameDraft] = useState("")
 
   // Reset expanded card when workout changes or new ex added
   useEffect(() => {
@@ -100,11 +102,40 @@ export function WorkoutScreen({
     <section className={`sm-scr ${active ? "on" : ""}`} aria-label="Workout">
       <div className="woHdr">
         <div className="row jb">
-          <div>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <div className="t10 w7 c2 upper">In Progress</div>
-            <div className="t17 w9 mt4" style={{ letterSpacing: "-.4px" }}>
-              {current ? routine?.name || "Workout" : "—"}
-            </div>
+            {current && editingName ? (
+              <input
+                autoFocus
+                className="inp"
+                style={{ marginTop: 4, padding: "6px 10px", fontSize: 16, fontWeight: 800, letterSpacing: "-.3px" }}
+                value={nameDraft}
+                onChange={(e) => setNameDraft(e.target.value)}
+                onBlur={() => {
+                  setWorkoutName(nameDraft.trim())
+                  setEditingName(false)
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") { setWorkoutName(nameDraft.trim()); setEditingName(false) }
+                  if (e.key === "Escape") setEditingName(false)
+                }}
+                maxLength={40}
+              />
+            ) : (
+              <div
+                className="t17 w9 mt4"
+                style={{ letterSpacing: "-.4px", cursor: current ? "pointer" : "default" }}
+                onClick={() => {
+                  if (!current) return
+                  setNameDraft(current.customName || routine?.name || "Workout")
+                  setEditingName(true)
+                }}
+                title={current ? "Tap to rename" : undefined}
+              >
+                {current ? (current.customName || routine?.name || "Workout") : "—"}
+                {current ? <span className="t10 c3" style={{ marginLeft: 6, fontWeight: 500 }}>✎</span> : null}
+              </div>
+            )}
             <div className="t11 c2 mt4">{current && gym ? gym.name : "—"}</div>
           </div>
           <div style={{ textAlign: "right" }}>
@@ -249,7 +280,7 @@ export function WorkoutScreen({
                         </span>
                         <div style={{ width: 40 }} />
                       </div>
-                      {Array.from({ length: ex.sets || 3 }).map((_, si) => {
+                      {Array.from({ length: current.setCounts?.[i] ?? (ex.sets || 3) }).map((_, si) => {
                         const s = getSet(i, si, ex)
                         return (
                           <div key={si} className="logRow">
@@ -318,6 +349,19 @@ export function WorkoutScreen({
                           </div>
                         )
                       })}
+                      <div className="row g8" style={{ justifyContent: "center", marginTop: 8 }}>
+                        <button
+                          type="button"
+                          className="bdg"
+                          onClick={() => removeSetFromExercise(i)}
+                          disabled={(current.setCounts?.[i] ?? (ex.sets || 3)) <= 1}
+                        >
+                          − Remove set
+                        </button>
+                        <button type="button" className="bdg bdo" onClick={() => addSetToExercise(i)}>
+                          + Add set
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
